@@ -1,4 +1,4 @@
-FROM docker.io/bitnami/minideb:buster
+FROM docker.io/bitnami/minideb:buster as builder
 LABEL maintainer "Bitnami <containers@bitnami.com>"
 
 ENV HOME="/" \
@@ -13,8 +13,12 @@ RUN wget -nc -P /tmp/bitnami/pkg/cache/ https://downloads.bitnami.com/files/stac
     echo "552860ea4154ebe62a26d9b2ab9ea9057517dfcda57342508f59a7eda0823003  /tmp/bitnami/pkg/cache/metrics-server-0.4.2-0-linux-amd64-debian-10.tar.gz" | sha256sum -c - && \
     tar -zxf /tmp/bitnami/pkg/cache/metrics-server-0.4.2-0-linux-amd64-debian-10.tar.gz -P --transform 's|^[^/]*/files|/opt/bitnami|' --wildcards '*/files' && \
     rm -rf /tmp/bitnami/pkg/cache/metrics-server-0.4.2-0-linux-amd64-debian-10.tar.gz
-RUN chmod g+rwX /opt/bitnami
 
+
+From registry.access.redhat.com/ubi8/ubi
+
+COPY --from=builder /opt/bitnami /opt/bitnami
+RUN chmod g+rwX /opt/bitnami
 RUN chown -R 1001:root /opt/bitnami/metrics-server && chmod -R g+rwX /opt/bitnami/metrics-server
 ENV BITNAMI_APP_NAME="metrics-server" \
     BITNAMI_IMAGE_VERSION="0.4.2-debian-10-r58" \
